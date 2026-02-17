@@ -325,8 +325,8 @@
         <div class="year-display" id="year-display">2004</div>
       </div>
       <div class="control-group" style="justify-content: flex-end;">
-        <span class="control-label" id="year-range-label">1974 – 2023</span>
-        <input type="range" id="year-slider" min="1974" max="2023" value="2004" step="1" />
+        <span class="control-label" id="year-range-label">1974 - 2022</span>
+        <input type="range" id="year-slider" min="1974" max="2022" value="2004" step="1" />
       </div>
     </div>
   </header>
@@ -391,8 +391,8 @@ function stateValueMap(year) {
 }
 
 function localValueMap(year) {
-  const map = new Map();  // key: countyFips
-  const byCounty = d3.group(localDataRaw, d => d.countyFips);
+  const map = new Map();  // key: County_FIPS_Code
+  const byCounty = d3.group(localDataRaw, d => d.County_FIPS_Code);
   byCounty.forEach((rows, fips) => {
     const sorted = rows.map(d => ({...d, dist: Math.abs(d.year - year)}))
                        .sort((a,b) => a.dist - b.dist);
@@ -431,7 +431,7 @@ async function init() {
   const statemesh = topojson.mesh(us, us.objects.states, (a,b) => a !== b);
 
   // Local county FIPS set for fast lookup
-  const localCountyFips = new Set(localDataRaw.map(d => d.countyFips));
+  const localFipsCode = new Set(localDataRaw.map(d => d.County_FIPS_Code));
 
   // SVG
   const svg = d3.select("#map-container").append("svg")
@@ -452,7 +452,7 @@ async function init() {
   // ── County layer (local regions only) ──
   const localG = g.append("g").attr("class","local-layer");
   const localPaths = localG.selectAll("path")
-    .data(counties.features.filter(d => localCountyFips.has(d.id)))
+    .data(counties.features.filter(d => localFipsCode.has(d.id)))
     .join("path")
       .attr("class","local-path")
       .attr("d", path);
