@@ -295,6 +295,17 @@
     align-items: center;
   }
 
+  footer a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+  }
+
+  footer a:hover {
+    color: var(--accent);
+    text-decoration-color: var(--accent);
+  }
+
   #reset-btn {
     font-family: 'DM Mono', monospace;
     font-size: 0.6rem;
@@ -317,7 +328,7 @@
   <header>
     <div class="title-block">
       <h1>U.S. WAGE MAP</h1>
-      <p>State &amp; Local Minimum Wage · Annual</p>
+      <p>State &amp; Local Minimum Wages</p>
     </div>
     <div class="controls">
       <div class="control-group">
@@ -334,7 +345,7 @@
   <div id="map-container">
     <div id="zoom-hint">SCROLL TO ZOOM · CLICK STATE TO FOCUS</div>
     <div id="legend-container">
-      <div class="legend-title">Annual Wage ($)</div>
+      <div class="legend-title">Minimum Wage ($)</div>
       <div class="legend-bar" id="legend-bar"></div>
       <div class="legend-ticks" id="legend-ticks"></div>
     </div>
@@ -353,7 +364,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // CONFIG — adjust these to taste
 // ─────────────────────────────────────────────────────────────────────────────
-const LOCAL_ZOOM_THRESHOLD = 3;  // zoom scale at which local regions appear
+const LOCAL_ZOOM_THRESHOLD = 2;  // zoom scale at which local regions appear
 const COLOR_SCHEME_STATE  = d3.schemeYlGnBu[8];
 const COLOR_SCHEME_LOCAL  = d3.schemeYlOrRd[8];
 
