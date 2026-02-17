@@ -405,12 +405,13 @@ function stateValueMap(year) {
 function localValueMap(year) {
   const map = new Map();  // key: County_FIPS_Code
   const byCounty = d3.group(localDataRaw, d => d.County_FIPS_Code);
+  console.log(byCounty);
   byCounty.forEach((rows, fips) => {
     const sorted = rows.map(d => ({...d, dist: Math.abs(d.year - year)}))
                        .sort((a,b) => a.dist - b.dist);
     const row = sorted[0];
-    const val = row.min;
-    map.set(fips, { value: Math.round(val * 100) / 100, name: row.regionName });
+    console.log(row);
+    map.set(fips, { value: Math.round(row.Annual_Minimum * 100) / 100, name: row['City/County'] });
   });
   console.log(map);
   return map;
