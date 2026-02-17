@@ -363,6 +363,10 @@ const COLOR_SCHEME_LOCAL  = d3.schemeYlOrRd[8];
 let currentYear   = 2004;
 let currentZoom   = 1;
 
+// where our data will live once loaded
+let stateDataRaw = [];
+let localDataRaw = [];
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -386,16 +390,14 @@ function stateValueMap(year) {
   return map;
 }
 
-function localValueMap(year, metric) {
+function localValueMap(year) {
   const map = new Map();  // key: countyFips
   const byCounty = d3.group(localDataRaw, d => d.countyFips);
   byCounty.forEach((rows, fips) => {
     const sorted = rows.map(d => ({...d, dist: Math.abs(d.year - year)}))
                        .sort((a,b) => a.dist - b.dist);
     const row = sorted[0];
-    const val = metric === "Minimum" ? row.min
-              : metric === "Maximum" ? row.max
-              : row.avg;
+    const val = row.min;
     map.set(fips, { value: Math.round(val * 100) / 100, name: row.regionName });
   });
   return map;
