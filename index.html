@@ -353,7 +353,7 @@
 
   <footer>
     <span>Source: <a href="https://github.com/benzipperer/historicalminwage/">Kavya Vaghul and Ben Zipperer for the Washington Center for Equitable Growth</a></span>
-    <button id="reset-btn">↺ Reset View</button>
+    <button id="reset-btn">↻ Reset View</button>
   </footer>
 
 </div>
@@ -373,13 +373,6 @@ let stateDataRaw = [];
 let localDataRaw = [];
 
 // HELPERS
-function closestYear(data, year) {
-  // For a given FIPS, find the row whose year is closest to `year`
-  // this should usually just return the same year, but just in case
-  const grouped = d3.group(data, d => d.State_FIPS_Code || d.stateFips);
-  return grouped;
-}
-
 function stateValueMap(year) {
   const map = new Map();
   // Group by FIPS, pick closest year
@@ -391,22 +384,18 @@ function stateValueMap(year) {
     const val = row.Annual_State_Minimum
     map.set(fips.padStart(2,'0'), Math.round(val * 100) / 100);
   });
-  console.log(map);
   return map;
 }
 
 function localValueMap(year) {
   const map = new Map();  // key: County_FIPS_Code
   const byCounty = d3.group(localDataRaw, d => d.County_FIPS_Code);
-  console.log(byCounty);
   byCounty.forEach((rows, fips) => {
     const sorted = rows.map(d => ({...d, dist: Math.abs(d.Year - year)}))
                        .sort((a,b) => a.dist - b.dist);
     const row = sorted[0];
-    console.log(row);
     map.set(fips, { value: Math.round(row.Annual_Minimum * 100) / 100, name: row['City/County'] });
   });
-  console.log(map);
   return map;
 }
 
@@ -478,7 +467,6 @@ async function init() {
       g.attr("stroke-width", 1 / transform.k);
       currentZoom = transform.k;
       updateLocalVisibility();
-      document.getElementById("zoom-hint").classList.toggle("local-active", transform.k >= LOCAL_ZOOM_THRESHOLD);
     });
 
   svg.call(zoom);
@@ -528,7 +516,7 @@ async function init() {
       const val = svm.get(d.id);
       showTip(event,
         `<div class="tip-name">${d.properties.name}</div>
-         <div><span class="tip-val">$${val?.toFixed(2) ?? "—"}</span> minimum wage</div>
+         <div><span class="tip-val">$${val != null && !isNaN(val) ? val.toFixed(2) : "—"}</span> minimum wage</div>
          <div style="color:var(--muted);font-size:0.6rem;margin-top:3px">${currentYear}</div>`
       );
     })
@@ -543,11 +531,10 @@ async function init() {
       // Get state fips from county fips (first 2 digits)
       const stateFips = d.id.slice(0,2);
       const stateVal  = svm.get(stateFips);
-      console.log(info, stateVal, d);
       showTip(event,
-        `<div class="tip-name">${info.name ?? d.id}</div>
-         <div><span class="tip-val" style="color:var(--accent2)">$${info?.value?.toFixed(2) ?? "—"}</span> local minimum wage</div>
-         <div class="tip-local">State rate: $${stateVal?.toFixed(2) ?? "—"}</div>
+        `<div class="tip-name">${info?.name ?? d.id}</div>
+         <div><span class="tip-val" style="color:var(--accent2)">$${info?.value != null && !isNaN(info.value) ? info.value.toFixed(2) : "—"}</span> local minimum wage</div>
+         <div class="tip-local">State rate: $${stateVal != null && !isNaN(stateVal) ? stateVal.toFixed(2) : "—"}</div>
          <div style="color:var(--muted);font-size:0.6rem;margin-top:3px">${currentYear}</div>`
       );
     })
