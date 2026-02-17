@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>U.S. Wage Map</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0c0f14;
+    --surface: #13181f;
+    --border: #1e2730;
+    --accent: #4af0b0;
+    --accent2: #f0a84a;
+    --text: #d4dce8;
+    --muted: #5a6778;
+    --radius: 6px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    overflow: hidden;
+  }
+
+  #app {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    z-index: 10;
+  }
+
+  .title-block h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    color: #fff;
+  }
+
+  .title-block p {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 1px;
+    letter-spacing: 0.05em;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .control-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .metric-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2px;
+  }
+
+  .metric-tab {
+    padding: 4px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+  }
+
+  .metric-tab.active {
+    background: var(--accent);
+    color: #0c0f14;
+    font-weight: 500;
+  }
+
+  .year-display {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-align: center;
+    line-height: 1;
+  }
+
+  /* ── Year Slider ── */
+  #year-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 180px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  #year-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+
+  #year-slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+  #year-slider::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+  }
+
+  /* ── Map ── */
+  #map-container {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  #map-container svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* State fills */
+  .state-path {
+    stroke: #1a2230;
+    stroke-width: 0.5px;
+    cursor: pointer;
+    transition: filter 0.1s;
+  }
+  .state-path:hover { filter: brightness(1.25); }
+
+  /* Local region fills */
+  .local-path {
+    stroke: #0c0f14;
+    stroke-width: 0.3px;
+    cursor: pointer;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s, filter 0.1s;
+  }
+  .local-path.visible { opacity: 1; pointer-events: all; }
+  .local-path:hover { filter: brightness(1.3); }
+
+  /* State mesh overlay */
+  .state-mesh {
+    fill: none;
+    stroke: #2a3a4a;
+    stroke-width: 0.8px;
+    pointer-events: none;
+  }
+
+  /* ── Legend ── */
+  #legend-container {
+    position: absolute;
+    bottom: 18px;
+    left: 20px;
+    background: rgba(13,18,26,0.92);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    backdrop-filter: blur(6px);
+  }
+
+  .legend-title {
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .legend-bar {
+    display: flex;
+    align-items: stretch;
+    border-radius: 3px;
+    overflow: hidden;
+    height: 10px;
+    width: 200px;
+  }
+
+  .legend-swatch { flex: 1; }
+
+  .legend-ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 0.58rem;
+    color: var(--muted);
+  }
+
+  /* ── Zoom indicator ── */
+  #zoom-hint {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: rgba(13,18,26,0.85);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    pointer-events: none;
+    transition: color 0.3s;
+  }
+  #zoom-hint.local-active { color: var(--accent2); border-color: var(--accent2); }
+
+  /* ── Tooltip ── */
+  #tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: rgba(13,18,26,0.95);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 0.7rem;
+    line-height: 1.6;
+    color: var(--text);
+    opacity: 0;
+    transition: opacity 0.12s;
+    z-index: 100;
+    max-width: 200px;
+  }
+
+  #tooltip.visible { opacity: 1; }
+  #tooltip .tip-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  #tooltip .tip-val {
+    color: var(--accent);
+    font-weight: 500;
+  }
+  #tooltip .tip-local {
+    color: var(--accent2);
+    font-size: 0.62rem;
+    margin-top: 2px;
+  }
+
+  /* ── Footer ── */
+  footer {
+    padding: 8px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #reset-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 3px 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  #reset-btn:hover { color: var(--accent); border-color: var(--accent); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="title-block">
+      <h1>U.S. WAGE MAP</h1>
+      <p>State &amp; Local Minimum Wage · Annual</p>
+    </div>
+    <div class="controls">
+      <div class="control-group">
+        <span class="control-label">Year</span>
+        <div class="year-display" id="year-display">2004</div>
+      </div>
+      <div class="control-group" style="justify-content: flex-end;">
+        <span class="control-label" id="year-range-label">1974 – 2023</span>
+        <input type="range" id="year-slider" min="1974" max="2023" value="2004" step="1" />
+      </div>
+    </div>
+  </header>
+
+  <div id="map-container">
+    <div id="zoom-hint">SCROLL TO ZOOM · CLICK STATE TO FOCUS</div>
+    <div id="legend-container">
+      <div class="legend-title">Annual Wage ($)</div>
+      <div class="legend-bar" id="legend-bar"></div>
+      <div class="legend-ticks" id="legend-ticks"></div>
+    </div>
+  </div>
+
+  <div id="tooltip"></div>
+
+  <footer>
+    <span>Source: BLS / DOL · Regions shown at zoom ≥ 3×</span>
+    <button id="reset-btn">↺ Reset View</button>
+  </footer>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIG — adjust these to taste
+// ─────────────────────────────────────────────────────────────────────────────
+const LOCAL_ZOOM_THRESHOLD = 3;  // zoom scale at which local regions appear
+const COLOR_SCHEME_STATE  = d3.schemeYlGnBu[8];
+const COLOR_SCHEME_LOCAL  = d3.schemeYlOrRd[8];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────────────────
+let currentYear   = 2004;
+let currentZoom   = 1;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+function closestYear(data, year) {
+  // For a given FIPS, find the row whose year is closest to `year`
+  const grouped = d3.group(data, d => d.State_FIPS_Code || d.stateFips);
+  return grouped;
+}
+
+function stateValueMap(year) {
+  const map = new Map();
+  // Group by FIPS, pick closest year
+  const byFips = d3.group(stateDataRaw, d => d.State_FIPS_Code);
+  byFips.forEach((rows, fips) => {
+    const sorted = rows.map(d => ({...d, dist: Math.abs(d.Year - year)}))
+                       .sort((a,b) => a.dist - b.dist);
+    const row = sorted[0];
+    const val = row.Annual_State_Minimum
+    map.set(fips.padStart(2,'0'), Math.round(val * 100) / 100);
+  });
+  return map;
+}
+
+function localValueMap(year, metric) {
+  const map = new Map();  // key: countyFips
+  const byCounty = d3.group(localDataRaw, d => d.countyFips);
+  byCounty.forEach((rows, fips) => {
+    const sorted = rows.map(d => ({...d, dist: Math.abs(d.year - year)}))
+                       .sort((a,b) => a.dist - b.dist);
+    const row = sorted[0];
+    const val = metric === "Minimum" ? row.min
+              : metric === "Maximum" ? row.max
+              : row.avg;
+    map.set(fips, { value: Math.round(val * 100) / 100, name: row.regionName });
+  });
+  return map;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DRAW
+// ─────────────────────────────────────────────────────────────────────────────
+async function init() {
+  const us = await d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/counties-albers-10m.json");
+
+  const container = document.getElementById("map-container");
+  const W = container.clientWidth;
+  const H = container.clientHeight;
+
+  const path = d3.geoPath();
+
+  // load datasets
+  const [stateDataRaw, localDataRaw] = await Promise.all([
+    d3.csv("/data/mw_state_annual.csv"),
+    d3.csv("/data/mw_substate_annual.csv")
+  ]);
+
+  // Color scales
+  const stateColor = d3.scaleQuantize([5, 16], COLOR_SCHEME_STATE);
+  const localColor  = d3.scaleQuantize([5, 16], COLOR_SCHEME_LOCAL);
+
+  // TopoJSON features
+  const counties = topojson.feature(us, us.objects.counties);
+  const states   = topojson.feature(us, us.objects.states);
+  const statemesh = topojson.mesh(us, us.objects.states, (a,b) => a !== b);
+
+  // Local county FIPS set for fast lookup
+  const localCountyFips = new Set(localDataRaw.map(d => d.countyFips));
+
+  // SVG
+  const svg = d3.select("#map-container").append("svg")
+    .attr("width", W).attr("height", H)
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .style("display","block");
+
+  const g = svg.append("g");
+
+  // ── State layer ──
+  const stateG = g.append("g").attr("class","state-layer");
+  const statePaths = stateG.selectAll("path")
+    .data(states.features)
+    .join("path")
+      .attr("class","state-path")
+      .attr("d", path);
+
+  // ── County layer (local regions only) ──
+  const localG = g.append("g").attr("class","local-layer");
+  const localPaths = localG.selectAll("path")
+    .data(counties.features.filter(d => localCountyFips.has(d.id)))
+    .join("path")
+      .attr("class","local-path")
+      .attr("d", path);
+
+  // ── State mesh ──
+  g.append("path")
+    .attr("class","state-mesh")
+    .attr("d", path(statemesh));
+
+  // ── Zoom ──
+  const zoom = d3.zoom()
+    .scaleExtent([1, 10])
+    .on("zoom", (event) => {
+      const {transform} = event;
+      g.attr("transform", transform);
+      g.attr("stroke-width", 1 / transform.k);
+      currentZoom = transform.k;
+      updateLocalVisibility();
+      document.getElementById("zoom-hint").classList.toggle("local-active", transform.k >= LOCAL_ZOOM_THRESHOLD);
+    });
+
+  svg.call(zoom);
+  svg.on("click", reset);
+
+  // Click state to zoom in
+  statePaths.on("click", (event, d) => {
+    event.stopPropagation();
+    const [[x0,y0],[x1,y1]] = path.bounds(d);
+    svg.transition().duration(750).call(
+      zoom.transform,
+      d3.zoomIdentity
+        .translate(W/2, H/2)
+        .scale(Math.min(8, 0.85 / Math.max((x1-x0)/W, (y1-y0)/H)))
+        .translate(-(x0+x1)/2, -(y0+y1)/2),
+      d3.pointer(event, svg.node())
+    );
+  });
+
+  function reset() {
+    svg.transition().duration(650).call(
+      zoom.transform,
+      d3.zoomIdentity,
+      d3.zoomTransform(svg.node()).invert([W/2, H/2])
+    );
+  }
+
+  document.getElementById("reset-btn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    reset();
+  });
+
+  // ── Tooltip ──
+  const tip = document.getElementById("tooltip");
+
+  function showTip(event, html) {
+    tip.innerHTML = html;
+    tip.classList.add("visible");
+    moveTip(event);
+  }
+  function moveTip(event) {
+    const x = event.clientX, y = event.clientY;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    tip.style.left = (x + 14 + tw > window.innerWidth ? x - tw - 10 : x + 14) + "px";
+    tip.style.top  = (y - 10 + th > window.innerHeight ? y - th : y - 10) + "px";
+  }
+  function hideTip() { tip.classList.remove("visible"); }
+
+  statePaths
+    .on("mousemove", (event, d) => {
+      const svm = stateValueMap(currentYear);
+      const val = svm.get(d.id);
+      showTip(event,
+        `<div class="tip-name">${d.properties.name}</div>
+         <div><span class="tip-val">$${val ?? "—"}</span> minimum wage</div>
+         <div style="color:var(--muted);font-size:0.6rem;margin-top:3px">${currentYear}</div>`
+      );
+    })
+    .on("mouseleave", hideTip);
+
+  localPaths
+    .on("mousemove", (event, d) => {
+      event.stopPropagation();
+      const lvm = localValueMap(currentYear);
+      const info = lvm.get(d.id);
+      const svm  = stateValueMap(currentYear);
+      // Get state fips from county fips (first 2 digits)
+      const stateFips = d.id.slice(0,2);
+      const stateVal  = svm.get(stateFips);
+      showTip(event,
+        `<div class="tip-name">${info?.name ?? d.id}</div>
+         <div><span class="tip-val" style="color:var(--accent2)">$${info?.value ?? "—"}</span> local minimum wage</div>
+         <div class="tip-local">State rate: $${stateVal ?? "—"}</div>
+         <div style="color:var(--muted);font-size:0.6rem;margin-top:3px">${currentYear}</div>`
+      );
+    })
+    .on("mousemove", (event, d) => {
+      event.stopPropagation();
+      moveTip(event);
+      const lvm = localValueMap(currentYear);
+      const info = lvm.get(d.id);
+      const svm  = stateValueMap(currentYear);
+      const stateFips = d.id.slice(0,2);
+      const stateVal  = svm.get(stateFips);
+      showTip(event,
+        `<div class="tip-name">${info?.name ?? d.id}</div>
+         <div><span class="tip-val" style="color:var(--accent2)">$${info?.value ?? "—"}</span> local minimum wage</div>
+         <div class="tip-local">State rate: $${stateVal ?? "—"}</div>
+         <div style="color:var(--muted);font-size:0.6rem;margin-top:3px">${currentYear}</div>`
+      );
+    })
+    .on("mouseleave", hideTip);
+
+  // ── Legend ──
+  buildLegend(stateColor, "State");
+
+  function buildLegend(scale) {
+    const bar = document.getElementById("legend-bar");
+    const ticks = document.getElementById("legend-ticks");
+    bar.innerHTML = "";
+    ticks.innerHTML = "";
+    const [lo, hi] = scale.domain();
+    const n = scale.range().length;
+    const step = (hi - lo) / n;
+    scale.range().forEach((c, i) => {
+      const sw = document.createElement("div");
+      sw.className = "legend-swatch";
+      sw.style.background = c;
+      bar.appendChild(sw);
+    });
+    [lo, (lo+hi)/2, hi].forEach(v => {
+      const t = document.createElement("span");
+      t.textContent = "$" + v.toFixed(0);
+      ticks.appendChild(t);
+    });
+  }
+
+  // ── Render loop ──
+  function render() {
+    const svm = stateValueMap(currentYear);
+    const lvm = localValueMap(currentYear);
+
+    statePaths.attr("fill", d => {
+      const v = svm.get(d.id);
+      return v != null ? stateColor(v) : "#1e2730";
+    });
+
+    localPaths.attr("fill", d => {
+      const info = lvm.get(d.id);
+      return info ? localColor(info.value) : "#1e2730";
+    });
+  }
+
+  function updateLocalVisibility() {
+    localPaths.classed("visible", currentZoom >= LOCAL_ZOOM_THRESHOLD);
+  }
+
+  render();
+
+  // ── Controls ──
+  const slider = document.getElementById("year-slider");
+  const yearDisplay = document.getElementById("year-display");
+
+  slider.addEventListener("input", () => {
+    currentYear = +slider.value;
+    yearDisplay.textContent = currentYear;
+    render();
+  });
+}
+
+init();
+</script>
+</body>
+</html>
