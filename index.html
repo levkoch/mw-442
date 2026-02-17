@@ -362,8 +362,7 @@
 
 // CONFIG
 const LOCAL_ZOOM_THRESHOLD = 2;  // zoom scale at which local regions appear
-const COLOR_SCHEME_STATE  = d3.schemeYlGnBu[8];
-const COLOR_SCHEME_LOCAL  = d3.schemeYlOrRd[8];
+const COLOR_SCHEME  = d3.schemeYlGnBu[8];
 
 // STATE VARIABLES
 let currentYear   = 2004;
@@ -430,8 +429,8 @@ async function init() {
   ]);
 
   // Color scales
-  const stateColor = d3.scaleQuantize([5, 16], COLOR_SCHEME_STATE);
-  const localColor  = d3.scaleQuantize([5, 16], COLOR_SCHEME_LOCAL);
+  const stateColor = d3.scaleQuantize([5, 16], COLOR_SCHEME);
+  const localColor  = d3.scaleQuantize([5, 16], COLOR_SCHEME);
 
   // TopoJSON features
   const counties = topojson.feature(us, us.objects.counties);
