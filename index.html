@@ -191,8 +191,8 @@
   /* ── Legend ── */
   #legend-container {
     position: absolute;
-    bottom: 18px;
-    left: 20px;
+    bottom: 16px;
+    left: 16px;
     background: rgba(13,18,26,0.92);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -230,12 +230,13 @@
   /* ── Zoom indicator ── */
   #zoom-hint {
     position: absolute;
-    top: 14px;
+    top: 16px;
     right: 16px;
     font-size: 0.6rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--accent2);
+    border-color: var(--accent2);
     background: rgba(13,18,26,0.85);
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -243,7 +244,6 @@
     pointer-events: none;
     transition: color 0.3s;
   }
-  #zoom-hint.local-active { color: var(--accent2); border-color: var(--accent2); }
 
   /* ── Tooltip ── */
   #tooltip {
@@ -528,7 +528,7 @@ async function init() {
       const val = svm.get(d.id);
       showTip(event,
         `<div class="tip-name">${d.properties.name}</div>
-         <div><span class="tip-val">$${val ?? "—"}</span> minimum wage</div>
+         <div><span class="tip-val">$${val?.toFixed(2) ?? "—"}</span> minimum wage</div>
          <div style="color:var(--muted);font-size:0.6rem;margin-top:3px">${currentYear}</div>`
       );
     })
@@ -546,8 +546,8 @@ async function init() {
       console.log(info, stateVal, d);
       showTip(event,
         `<div class="tip-name">${info.name ?? d.id}</div>
-         <div><span class="tip-val" style="color:var(--accent2)">$${info?.value ?? "—"}</span> local minimum wage</div>
-         <div class="tip-local">State rate: $${stateVal ?? "—"}</div>
+         <div><span class="tip-val" style="color:var(--accent2)">$${info?.value?.toFixed(2) ?? "—"}</span> local minimum wage</div>
+         <div class="tip-local">State rate: $${stateVal?.toFixed(2) ?? "—"}</div>
          <div style="color:var(--muted);font-size:0.6rem;margin-top:3px">${currentYear}</div>`
       );
     })
