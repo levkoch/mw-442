@@ -541,6 +541,7 @@ async function init() {
       // Get state fips from county fips (first 2 digits)
       const stateFips = d.id.slice(0,2);
       const stateVal  = svm.get(stateFips);
+      console.log(info, stateVal);
       showTip(event,
         `<div class="tip-name">${info["City/County"] ?? d.id}</div>
          <div><span class="tip-val" style="color:var(--accent2)">$${info?.Annual_Minimum ?? "—"}</span> local minimum wage</div>
