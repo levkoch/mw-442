@@ -398,6 +398,7 @@ function stateValueMap(year) {
     const val = row.Annual_State_Minimum
     map.set(fips.padStart(2,'0'), Math.round(val * 100) / 100);
   });
+  console.log(map);
   return map;
 }
 
@@ -411,6 +412,7 @@ function localValueMap(year) {
     const val = row.min;
     map.set(fips, { value: Math.round(val * 100) / 100, name: row.regionName });
   });
+  console.log(map);
   return map;
 }
 
