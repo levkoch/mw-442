@@ -341,7 +341,7 @@
   </header>
 
   <div id="map-container">
-    <div id="zoom-hint">SCROLL TO ZOOM · CLICK STATE TO FOCUS</div>
+    <div id="zoom-hint">SCROLL TO ZOOM · DRAG TO PAN</div>
     <div id="legend-container">
       <div class="legend-title">Minimum Wage ($)</div>
       <div class="legend-bar" id="legend-bar"></div>
@@ -482,15 +482,24 @@ async function init() {
     });
 
   svg.call(zoom);
-  svg.on("click", reset);
 
+  // center the map
   function reset() {
+    const bounds = path.bounds(states);
+    const [[x0, y0], [x1, y1]] = bounds;
+    const dx = x1 - x0;
+    const dy = y1 - y0;
+    const x = (x0 + x1) / 2;
+    const y = (y0 + y1) / 2;
+    const scale = Math.min(W / dx, H / dy) * 0.95;
+    const translate = [W / 2 - scale * x, H / 2 - scale * y];
+
     svg.transition().duration(650).call(
       zoom.transform,
-      d3.zoomIdentity,
-      d3.zoomTransform(svg.node()).invert([W/2, H/2])
+      d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
     );
   }
+  reset();
 
   document.getElementById("reset-btn").addEventListener("click", (e) => {
     e.stopPropagation();
