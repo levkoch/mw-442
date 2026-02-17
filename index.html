@@ -416,7 +416,7 @@ async function init() {
   const path = d3.geoPath();
 
   // load datasets
-  const [stateDataRaw, localDataRaw] = await Promise.all([
+  [stateDataRaw, localDataRaw] = await Promise.all([
     d3.csv("public/data/mw_state_annual.csv"),
     d3.csv("public/data/mw_substate_annual.csv")
   ]);
