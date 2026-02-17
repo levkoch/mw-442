@@ -415,8 +415,8 @@ async function init() {
 
   // load datasets
   const [stateDataRaw, localDataRaw] = await Promise.all([
-    d3.csv("/data/mw_state_annual.csv"),
-    d3.csv("/data/mw_substate_annual.csv")
+    d3.csv("public/data/mw_state_annual.csv"),
+    d3.csv("public/data/mw_substate_annual.csv")
   ]);
 
   // Color scales
