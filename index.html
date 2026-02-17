@@ -359,16 +359,13 @@
 </div>
 
 <script>
-// ─────────────────────────────────────────────────────────────────────────────
-// CONFIG — adjust these to taste
-// ─────────────────────────────────────────────────────────────────────────────
+
+// CONFIG
 const LOCAL_ZOOM_THRESHOLD = 2;  // zoom scale at which local regions appear
 const COLOR_SCHEME_STATE  = d3.schemeYlGnBu[8];
 const COLOR_SCHEME_LOCAL  = d3.schemeYlOrRd[8];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────────────────────────────────────
+// STATE VARIABLES
 let currentYear   = 2004;
 let currentZoom   = 1;
 
@@ -376,11 +373,10 @@ let currentZoom   = 1;
 let stateDataRaw = [];
 let localDataRaw = [];
 
-// ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
-// ─────────────────────────────────────────────────────────────────────────────
 function closestYear(data, year) {
   // For a given FIPS, find the row whose year is closest to `year`
+  // this should usually just return the same year, but just in case
   const grouped = d3.group(data, d => d.State_FIPS_Code || d.stateFips);
   return grouped;
 }
@@ -405,7 +401,7 @@ function localValueMap(year) {
   const byCounty = d3.group(localDataRaw, d => d.County_FIPS_Code);
   console.log(byCounty);
   byCounty.forEach((rows, fips) => {
-    const sorted = rows.map(d => ({...d, dist: Math.abs(d.year - year)}))
+    const sorted = rows.map(d => ({...d, dist: Math.abs(d.Year - year)}))
                        .sort((a,b) => a.dist - b.dist);
     const row = sorted[0];
     console.log(row);
