@@ -245,6 +245,64 @@
     transition: color 0.3s;
   }
 
+  /* ── About Button ── */
+  #about-btn {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    border-color: var(--accent2);
+    background: rgba(13,18,26,0.85);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+
+  #about-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── About Overlay ── */
+  #about-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+
+  #about-overlay.hidden {
+    display: none;
+  }
+
+  #about-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  #about-card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+
+  #about-card p {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
   /* ── Tooltip ── */
   #tooltip {
     position: fixed;
@@ -326,7 +384,7 @@
   <header>
     <div class="title-block">
       <h1>U.S. WAGE MAP</h1>
-      <p>State &amp; Local Minimum Wages</p>
+      <p>State &amp; Local Minimum Wages · Lev Kochergin & Sonya Outhred</p>
     </div>
     <div class="controls">
       <div class="control-group">
@@ -342,6 +400,19 @@
 
   <div id="map-container">
     <div id="zoom-hint">SCROLL TO ZOOM · DRAG TO PAN</div>
+    <button id="about-btn">ABOUT</button>
+    <div id="about-overlay" class="hidden">
+    <div id="about-card">
+      <h2>Motivation</h2>
+      <p>
+        The US has a peculiar minimum wage system where there can be different wages at the federal, state, 
+        and local level. Within that not all cities or counties have their own minimum wage and not all 
+        states have a dedicated state wage, so it can be rather difficult to grasp what the true minimum wage 
+        of the US is. We wanted to depict the change of minimum wage over time that included all the different 
+        state or county wages as well.
+      </p>
+    </div>
+  </div>
     <div id="legend-container">
       <div class="legend-title">Minimum Wage ($)</div>
       <div class="legend-bar" id="legend-bar"></div>
@@ -365,7 +436,7 @@ const LOCAL_ZOOM_THRESHOLD = 2;  // zoom scale at which local regions appear
 const COLOR_SCHEME  = d3.schemeYlGnBu[8];
 
 // STATE VARIABLES
-let currentYear   = 2004;
+let currentYear   = 2022;
 let currentZoom   = 1;
 
 // where our data will live once loaded
@@ -399,9 +470,7 @@ function localValueMap(year) {
   return map;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // DRAW
-// ─────────────────────────────────────────────────────────────────────────────
 async function init() {
   const us = await d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/counties-albers-10m.json");
 
@@ -471,6 +540,27 @@ async function init() {
 
   svg.call(zoom);
 
+  // about button
+  const aboutOverlay = document.getElementById("about-overlay");
+  const aboutCard = document.getElementById("about-card");
+
+  function showAbout() {
+    aboutOverlay.classList.remove("hidden");
+  }
+
+  function hideAbout() {
+    aboutOverlay.classList.add("hidden");
+  }
+
+  document.getElementById("about-btn").addEventListener("click", (e) => {
+    e.stopPropagation();
+    showAbout();
+  });
+
+  // Close when clicking outside the card
+  aboutOverlay.addEventListener("click", hideAbout);
+  aboutCard.addEventListener("click", (e) => e.stopPropagation());
+  
   // center the map
   function reset() {
     const bounds = path.bounds(states);
