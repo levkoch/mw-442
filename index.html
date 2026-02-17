@@ -557,8 +557,8 @@ async function init() {
       const stateVal  = svm.get(stateFips);
       console.log(info, stateVal, d);
       showTip(event,
-        `<div class="tip-name">${info["City/County"] ?? d.id}</div>
-         <div><span class="tip-val" style="color:var(--accent2)">$${info?.Annual_Minimum ?? "—"}</span> local minimum wage</div>
+        `<div class="tip-name">${info.name ?? d.id}</div>
+         <div><span class="tip-val" style="color:var(--accent2)">$${info?.value ?? "—"}</span> local minimum wage</div>
          <div class="tip-local">State rate: $${stateVal ?? "—"}</div>
          <div style="color:var(--muted);font-size:0.6rem;margin-top:3px">${currentYear}</div>`
       );
