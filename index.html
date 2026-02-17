@@ -36,7 +36,7 @@
     height: 100vh;
   }
 
-  /* ── Header ── */
+  /* ---- Header ---- */
   header {
     display: flex;
     align-items: center;
@@ -118,7 +118,7 @@
     line-height: 1;
   }
 
-  /* ── Year Slider ── */
+  /* ---- Year Slider ---- */
   #year-slider {
     -webkit-appearance: none;
     appearance: none;
@@ -149,7 +149,7 @@
     cursor: pointer;
   }
 
-  /* ── Map ── */
+  /* ---- Map ---- */
   #map-container {
     position: relative;
     overflow: hidden;
@@ -188,7 +188,7 @@
     pointer-events: none;
   }
 
-  /* ── Legend ── */
+  /* ---- Legend ---- */
   #legend-container {
     position: absolute;
     bottom: 16px;
@@ -227,7 +227,7 @@
     color: var(--muted);
   }
 
-  /* ── Zoom indicator ── */
+  /* ---- Zoom indicator ---- */
   #zoom-hint {
     position: absolute;
     top: 16px;
@@ -245,11 +245,8 @@
     transition: color 0.3s;
   }
 
-  /* ── About Button ── */
-  #about-btn {
-    position: absolute;
-    top: 16px;
-    left: 16px;
+  /* -- buttons -- */
+  button {
     font-size: 0.6rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -263,9 +260,23 @@
     transition: color 0.3s;
   }
 
-  #about-btn:hover { color: var(--accent); border-color: var(--accent); }
+  button:hover { color: var(--accent); border-color: var(--accent); }
 
-  /* ── About Overlay ── */
+  /* ---- About Button ---- */
+  #about-btn {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+  }
+
+  /* -- reset button -- */
+  #reset-btn {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+  }
+  
+  /* ---- About Overlay ---- */
   #about-overlay {
     position: absolute;
     inset: 0;
@@ -303,7 +314,7 @@
     color: var(--muted);
   }
 
-  /* ── Tooltip ── */
+  /* ---- Tooltip ---- */
   #tooltip {
     position: fixed;
     pointer-events: none;
@@ -338,7 +349,7 @@
     margin-top: 2px;
   }
 
-  /* ── Footer ── */
+  /* ---- Footer ---- */
   footer {
     padding: 8px 24px;
     border-top: 1px solid var(--border);
@@ -361,21 +372,6 @@
     color: var(--accent);
     text-decoration-color: var(--accent);
   }
-
-  #reset-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 3px 10px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.15s;
-  }
-  #reset-btn:hover { color: var(--accent); border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -418,13 +414,15 @@
       <div class="legend-bar" id="legend-bar"></div>
       <div class="legend-ticks" id="legend-ticks"></div>
     </div>
+    <button id="reset-btn">↻ Reset View</button>
   </div>
 
   <div id="tooltip"></div>
 
   <footer>
-    <span>Source: <a href="https://github.com/benzipperer/historicalminwage/">Kavya Vaghul and Ben Zipperer for the Washington Center for Equitable Growth</a></span>
-    <button id="reset-btn">↻ Reset View</button>
+    <span>Source: <a href="https://github.com/benzipperer/historicalminwage/"
+      >Kavya Vaghul and Ben Zipperer for the Washington Center for Equitable Growth</a>
+    </span>
   </footer>
 
 </div>
@@ -506,7 +504,7 @@ async function init() {
 
   const g = svg.append("g");
 
-  // ── State layer ──
+  // ---- State layer ----
   const stateG = g.append("g").attr("class","state-layer");
   const statePaths = stateG.selectAll("path")
     .data(states.features)
@@ -514,7 +512,7 @@ async function init() {
       .attr("class","state-path")
       .attr("d", path);
 
-  // ── County layer (local regions only) ──
+  // ---- County layer (local regions only) ----
   const localG = g.append("g").attr("class","local-layer");
   const localPaths = localG.selectAll("path")
     .data(counties.features.filter(d => localFipsCode.has(d.id)))
@@ -522,12 +520,12 @@ async function init() {
       .attr("class","local-path")
       .attr("d", path);
 
-  // ── State mesh ──
+  // ---- State mesh ----
   g.append("path")
     .attr("class","state-mesh")
     .attr("d", path(statemesh));
 
-  // ── Zoom ──
+  // ---- Zoom ----
   const zoom = d3.zoom()
     .scaleExtent([1, 10])
     .on("zoom", (event) => {
@@ -584,7 +582,7 @@ async function init() {
     reset();
   });
 
-  // ── Tooltip ──
+  // ---- Tooltip ----
   const tip = document.getElementById("tooltip");
 
   function showTip(event, html) {
@@ -630,7 +628,7 @@ async function init() {
     })
     .on("mouseleave", hideTip);
 
-  // ── Legend ──
+  // ---- Legend ----
   buildLegend(stateColor, "State");
 
   function buildLegend(scale) {
@@ -654,7 +652,7 @@ async function init() {
     });
   }
 
-  // ── Render loop ──
+  // ---- Render loop ----
   function render() {
     const svm = stateValueMap(currentYear);
     const lvm = localValueMap(currentYear);
@@ -676,7 +674,7 @@ async function init() {
 
   render();
 
-  // ── Controls ──
+  // ---- Controls ----
   const slider = document.getElementById("year-slider");
   const yearDisplay = document.getElementById("year-display");
 
