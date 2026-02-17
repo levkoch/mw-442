@@ -541,22 +541,7 @@ async function init() {
       // Get state fips from county fips (first 2 digits)
       const stateFips = d.id.slice(0,2);
       const stateVal  = svm.get(stateFips);
-      console.log(info, stateVal);
-      showTip(event,
-        `<div class="tip-name">${info["City/County"] ?? d.id}</div>
-         <div><span class="tip-val" style="color:var(--accent2)">$${info?.Annual_Minimum ?? "—"}</span> local minimum wage</div>
-         <div class="tip-local">State rate: $${stateVal ?? "—"}</div>
-         <div style="color:var(--muted);font-size:0.6rem;margin-top:3px">${currentYear}</div>`
-      );
-    })
-    .on("mousemove", (event, d) => {
-      event.stopPropagation();
-      moveTip(event);
-      const lvm = localValueMap(currentYear);
-      const info = lvm.get(d.id);
-      const svm  = stateValueMap(currentYear);
-      const stateFips = d.id.slice(0,2);
-      const stateVal  = svm.get(stateFips);
+      console.log(info, stateVal, d);
       showTip(event,
         `<div class="tip-name">${info["City/County"] ?? d.id}</div>
          <div><span class="tip-val" style="color:var(--accent2)">$${info?.Annual_Minimum ?? "—"}</span> local minimum wage</div>
