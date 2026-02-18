@@ -452,9 +452,9 @@
       </p>
       <h2>References</h2> 
       <p>
-        <a href="https://github.com/topojson/us-atlas">TopoJSON's US Atlas</a> for the map base visualization. 
-        <a href="https://github.com/benzipperer/historicalminwage/">Vaghul & Zipper's "Historical Min Wage" 
-          repository</a> for the data.
+        We used <a href="https://github.com/topojson/us-atlas">TopoJSON's US Atlas</a> for the map base 
+        visualization, and <a href="https://github.com/benzipperer/historicalminwage/">Vaghul & Zipper's
+        "Historical Min Wage" repository</a> for the data.
       </p>
       <h2>Development Process</h2>
       <p>
@@ -627,7 +627,7 @@ async function init() {
   aboutCard.addEventListener("click", (e) => e.stopPropagation());
   
   // center the map
-  function reset() {
+  function reset(immediate = false) {
     const bounds = path.bounds(states);
     const [[x0, y0], [x1, y1]] = bounds;
     const dx = x1 - x0;
@@ -637,16 +637,17 @@ async function init() {
     const scale = Math.min(W / dx, H / dy) * 0.95;
     const translate = [W / 2 - scale * x, H / 2 - scale * y];
 
-    svg.transition().duration(650).call(
-      zoom.transform,
-      d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
-    );
+    if (immediate) {
+      svg.call(zoom.transform, t);
+    } else {
+      svg.transition().duration(650).call(zoom.transform, t);
+    }
   }
-  reset();
+  reset(true); // run with no animation
 
   document.getElementById("reset-btn").addEventListener("click", (e) => {
     e.stopPropagation();
-    reset();
+    reset(); // run with animation
   });
 
   // -- Tooltip --
