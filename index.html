@@ -638,9 +638,12 @@ async function init() {
     const translate = [W / 2 - scale * x, H / 2 - scale * y];
 
     if (immediate) {
-      svg.call(zoom.transform, t);
+      svg.call(zoom.transform, d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale));
     } else {
-      svg.transition().duration(650).call(zoom.transform, t);
+      svg.transition().duration(650).call(
+        zoom.transform,
+        d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+      );
     }
   }
   reset(true); // run with no animation
