@@ -400,11 +400,27 @@
     <div id="about-card">
       <h2>Motivation</h2>
       <p>
-        The US has a peculiar minimum wage system where there can be different wages at the federal, state, 
-        and local level. Within that not all cities or counties have their own minimum wage and not all 
-        states have a dedicated state wage, so it can be rather difficult to grasp what the true minimum wage 
-        of the US is. We wanted to depict the change of minimum wage over time that included all the different 
-        state or county wages as well.
+        How has the US minimum wage changed over the years? The US has a peculiar minimum wage system, 
+        with varying wages at the federal, state, and local levels. States, cities, and counties have 
+        a hodgepodge approach to minimum wages, making it difficult to grasp the true effects of these 
+        policies in many places in the country. We wanted to faithfully represent the impacts of layers 
+        of laws in an approachable format.
+      </p>
+      <h2>Design Rationale</h2>
+      <p>
+        The foundation of our visualization is an interactive map of all 50 states, where the viewer can 
+        zoom and pan on the map, select the year to view data for, between 1974 and 2022, and hover over 
+        a region to get the exact wage at that time. As the viewer zooms into the map, the county and city 
+        regions are revealed, which grants them access to additional information without being cluttered 
+        or initially overwhelming. We use a color gradient to encode the wages of each state, allowing the 
+        viewer to easily see trends between different states and changes over time when using the year 
+        slider. We initially present the most recent 2022 data, as this will be most relevant to viewers, 
+        but grant them the ability to explore historical trends. To compensate for the difficulty in 
+        distinguishing exact values with color encoding, we added a tooltip that displays the exact wage 
+        amount and name for each region. The county-level tooltips include additional information about 
+        the relative state minimum wage as well, allowing them to compare different layers of policy. We 
+        also include a reset view button for the user to be able to go back to the state-only view, a 
+        legend for the colors, and a hint in the corner to explain how to interact with the map.
       </p>
     </div>
   </div>
