@@ -316,6 +316,17 @@
     color: var(--muted);
   }
 
+  #about-card a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+  }
+
+  #about-card a:hover {
+    color: var(--accent);
+    text-decoration-color: var(--accent);
+  }
+
   /* -- Tooltip -- */
   #tooltip {
     position: fixed;
@@ -432,6 +443,23 @@
           repository</a> for the data.
       </p>
       <h2>Development Process</h2>
+      <p>
+        We split the work into two phases: processing data and creating a rough visualization, and then porting
+        and updating the visualization directly on the web with D3. We conducted research about which regions 
+        deviated from state laws, locating a dataset that had state and county wages over the last 50 years. 
+        Some additional processing was required to make the data compatible with D3, including renaming fields 
+        and adding additional FIPS codes to subregions. Then, we built a rough version of the visualization in 
+        Observable, allowing us to quickly iterate through design decisions for panning, zooming, and tooltips. 
+        We considered additional interactions, such as being able to click on a state to zoom in on it, ultimately 
+        deciding to leave them out, as panning and zooming proved sufficient to enable a rich experience. The 
+        second phase included publishing the visualization to the web for a better understanding of the final 
+        product, changing interactions with tooltip information and navigation, selecting a color scheme, and the 
+        display style of the visualization. Sonya worked on the initial phase, which took roughly 6 hours to 
+        complete. The longest part of the first phase was setting up the D3 zoom interaction. Lev worked on the 
+        second phase, which took around 8 hours to complete. The longest part was processing the county-level data 
+        to be consistent with the geographical dataset, and making final tweaks to ensure interactions with the 
+        visualization and layouts felt intuitive.
+      </p>
     </div>
   </div>
     <div id="legend-container">
