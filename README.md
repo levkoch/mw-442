@@ -1,3 +1,1 @@
-# us-minimum-wage
-
-The files in the [public](/public) directory are deployed to: https://cse442.pages.cs.washington.edu/26wi/a3/us-minimum-wage
+United States minimum wage map project. Lev Kochergin & Sonya Outhred for UW 442 Winter 2026, taught by Jeffrey Heer.
