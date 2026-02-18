@@ -36,7 +36,7 @@
     height: 100vh;
   }
 
-  /* ---- Header ---- */
+  /* -- Header -- */
   header {
     display: flex;
     align-items: center;
@@ -118,7 +118,7 @@
     line-height: 1;
   }
 
-  /* ---- Year Slider ---- */
+  /* -- Year Slider -- */
   #year-slider {
     -webkit-appearance: none;
     appearance: none;
@@ -149,7 +149,7 @@
     cursor: pointer;
   }
 
-  /* ---- Map ---- */
+  /* -- Map -- */
   #map-container {
     position: relative;
     overflow: hidden;
@@ -188,7 +188,7 @@
     pointer-events: none;
   }
 
-  /* ---- Legend ---- */
+  /* -- Legend -- */
   #legend-container {
     position: absolute;
     bottom: 16px;
@@ -226,10 +226,10 @@
     color: var(--muted);
   }
 
-  /* ---- Zoom indicator ---- */
+  /* -- Zoom hint -- */
   #zoom-hint {
     position: absolute;
-    top: 16px;
+    bottom: 16px;
     right: 16px;
     font-size: 0.6rem;
     letter-spacing: 0.1em;
@@ -261,7 +261,7 @@
 
   button:hover { color: var(--accent); border-color: var(--accent); }
 
-  /* ---- About Button ---- */
+  /* -- About Button -- */
   #about-btn {
     position: absolute;
     top: 16px;
@@ -271,11 +271,11 @@
   /* -- reset button -- */
   #reset-btn {
     position: absolute;
-    bottom: 16px;
+    top: 16px;
     right: 16px;
   }
   
-  /* ---- About Overlay ---- */
+  /* -- About Overlay -- */
   #about-overlay {
     position: absolute;
     inset: 0;
@@ -313,7 +313,7 @@
     color: var(--muted);
   }
 
-  /* ---- Tooltip ---- */
+  /* -- Tooltip -- */
   #tooltip {
     position: fixed;
     pointer-events: none;
@@ -348,7 +348,7 @@
     margin-top: 2px;
   }
 
-  /* ---- Footer ---- */
+  /* -- Footer -- */
   footer {
     padding: 8px 24px;
     border-top: 1px solid var(--border);
@@ -503,7 +503,7 @@ async function init() {
 
   const g = svg.append("g");
 
-  // ---- State layer ----
+  // -- State layer --
   const stateG = g.append("g").attr("class","state-layer");
   const statePaths = stateG.selectAll("path")
     .data(states.features)
@@ -511,7 +511,7 @@ async function init() {
       .attr("class","state-path")
       .attr("d", path);
 
-  // ---- County layer (local regions only) ----
+  // -- County layer (local regions only) --
   const localG = g.append("g").attr("class","local-layer");
   const localPaths = localG.selectAll("path")
     .data(counties.features.filter(d => localFipsCode.has(d.id)))
@@ -519,12 +519,12 @@ async function init() {
       .attr("class","local-path")
       .attr("d", path);
 
-  // ---- State mesh ----
+  // -- State mesh --
   g.append("path")
     .attr("class","state-mesh")
     .attr("d", path(statemesh));
 
-  // ---- Zoom ----
+  // -- Zoom --
   const zoom = d3.zoom()
     .scaleExtent([1, 10])
     .on("zoom", (event) => {
@@ -581,7 +581,7 @@ async function init() {
     reset();
   });
 
-  // ---- Tooltip ----
+  // -- Tooltip --
   const tip = document.getElementById("tooltip");
 
   function showTip(event, html) {
@@ -620,14 +620,15 @@ async function init() {
       const stateVal  = svm.get(stateFips);
       showTip(event,
         `<div class="tip-name">${info?.name ?? d.id}</div>
-         <div><span class="tip-val" style="color:var(--accent2)">$${info?.value != null && !isNaN(info.value) ? info.value.toFixed(2) : "—"}</span> local minimum wage</div>
+         <div><span class="tip-val" style="color:var(--accent2)">
+          $${info?.value != null && !isNaN(info.value) ? info.value.toFixed(2) : "—"}</span> local minimum wage</div>
          <div class="tip-local">State rate: $${stateVal != null && !isNaN(stateVal) ? stateVal.toFixed(2) : "—"}</div>
          <div style="color:var(--muted);font-size:0.6rem;margin-top:3px">${currentYear}</div>`
       );
     })
     .on("mouseleave", hideTip);
 
-  // ---- Legend ----
+  // -- Legend --
   buildLegend(stateColor, "State");
 
   function buildLegend(scale) {
@@ -651,7 +652,7 @@ async function init() {
     });
   }
 
-  // ---- Render loop ----
+  // -- Render loop --
   function render() {
     const svm = stateValueMap(currentYear);
     const lvm = localValueMap(currentYear);
@@ -673,7 +674,7 @@ async function init() {
 
   render();
 
-  // ---- Controls ----
+  // -- Controls --
   const slider = document.getElementById("year-slider");
   const yearDisplay = document.getElementById("year-display");
 
